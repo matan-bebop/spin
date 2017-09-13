@@ -1,0 +1,228 @@
+
+
+
+<!DOCTYPE html>
+<html>
+<head>
+	<meta name="author" content="Андрій Соколов">
+	<meta charset="UTF-8">
+</head>
+
+<body>
+
+  
+
+<svg id="svg-qubit" width="320" height="320"
+	xmlns="http://www.w3.org/2000/svg">
+
+	<!-- Axes arrow -->
+	<marker id="triangle"
+		viewBox="0 0 2 2" refX="0" refY="1" 
+		markerUnits="userSpaceOnUse"
+		markerWidth="10.0" markerHeight="10.0"
+		orient="auto">
+		<path d="M 0 0 L 2 1 L 0 2 z" fill="gray" />
+	</marker>
+
+	<!-- Red arrow for the qubit Bloch vector  -->
+	<marker id="qu-triangle"
+		viewBox="0 0 2 2" refX="0" refY="1" 
+		markerUnits="userSpaceOnUse"
+		preserveAspectRatio="none"
+		markerWidth="10.0" markerHeight="10.0"
+		orient="auto">
+		<path d="M 0 0 L 2 1 L 0 2 z" fill="red"/>
+	</marker>
+
+	<!-- Axes and the Bloch sphere -->
+	<g stroke="gray" fill="gray">
+
+	<g id="xy">
+
+	<circle cx="0" cy="0" r="1" fill="transparent"
+		transform="matrix(-86.6000, 50.0, 100, 0, 160.0, 160.0)"
+		vector-effect="non-scaling-stroke"/>
+
+	<line x1="160.0" y1="160.0" x2="30.0" y2="235.00"
+		marker-end="url(#triangle)"/> <!-- 0x -->
+
+	<line x1="160.0" y1="160.0" x2="310.0" y2="160.0"
+		marker-end="url(#triangle)"/> <!-- 0y -->
+
+	</g>
+
+	<g id="z">
+
+	<line x1="160.0" y1="160.0" x2="160.0" y2="10.0"
+		marker-end="url(#triangle)"/> <!-- 0z -->
+	
+	<circle cx="160.0" cy="160.0" r="100" fill="transparent"/>
+
+	</g>
+
+	</g>
+
+	<!-- Labels -->
+	<g fill="black">
+
+	<text x="30.0" y="255.00"> x </text>
+	<text x="310.0" y="177.0"> y </text>
+	<text x="170.0" y="10.0"> z </text>
+
+	<g id="points" fill="black">
+	<circle cx="160.0" cy="60.0" r="3"/>
+	<circle cx="160.0" cy="260.0" r="3"/>
+	</g>
+
+	<text x="165.0" y="53.0"> |1⟩ </text>
+	<text x="165.0" y="277.0"> |0⟩ </text>
+
+	</g>
+
+	<!-- The Bloch vector projection eye-helpers -->
+	<g id="xyhelpers" stroke="gray" stroke-width=1 stroke-dasharray="2 2">
+	<line id="helpx" x1="160.0" y1="160.0" x2="160.0" y2="160.0"/>
+	<line id="helpy" x1="160.0" y1="160.0" x2="160.0" y2="160.0"/>
+	</g>
+	<line id="helpxy" x1="160.0" y1="160.0" x2="160.0" y2="160.0"
+		stroke="gray" stroke-width=1 stroke-dasharray="2 2"/>
+	<!-- Bloch vector projections on 0x and 0y -->
+	<g id="projs" stroke="black" stroke-width=1>
+	<line id="projx" x1="160.0" y1="160.0" x2="160.0" y2="160.0"/>
+	<line id="projy" x1="160.0" y1="160.0" x2="160.0" y2="160.0"/>
+	</g>
+
+	<!-- Bloch vector; length is 0.9 due to the arrowhead -->
+	<line id="bloch-vector" x1="160.0" y1="160.0" x2="160.0" y2="70.0"
+		stroke="red" stroke-width=3 marker-end="url(#qu-triangle)"/>
+
+	<!-- Redraw elements if they are in front of the Bloch vector -->
+	<g id="overxy" opacity="1">
+	<use xlink:href="#xy" stroke="gray"/>
+	<use xlink:href="#xyhelpers"/>
+	<use xlink:href="#projs"/>
+	</g>
+
+	<g id="overz" opacity="0">
+	<use xlink:href="#z" stroke="gray"/>
+	<use xlink:href="#points"/>
+	</g>
+
+	<use id="overhelpxy" xlink:href="#helpxy"/>
+
+	<!-- Rotation buttons -->
+	<g opacity="0">
+	<polygon points="160.0,160.0 30.0,250.0 30.0,220.0"
+		onmousedown="Wx = W" onmouseup="Wx = 0"/>
+	<polygon points="160.0,160.0 310.0,175.00 310.0,145.00"
+		onmousedown="Wy = W" onmouseup="Wy = 0"/>
+	<polygon points="160.0,160.0 145.00,10.0 175.00,10.0"
+		onmousedown="Wz = W" onmouseup="Wz = 0"/>
+	</g>
+
+</svg>
+
+<script>
+
+function cabinet_projector(theta)
+{
+	const pi = Math.PI, sin = Math.sin, cos = Math.cos
+
+	return function project(x, y, z) {
+		var	px = y - x*sin(pi*theta/180),
+			py = z - x*cos(pi*theta/180) 
+
+		return [px, py]
+	}
+}
+
+var Sx = 0, Sy = 0, Sz = -1
+var Wx, Wy, Wz; Wx = Wy = Wz = 0
+
+const W = 0.5e-3
+
+function advance_paulis(dt)
+{
+	Sx += (Wy*Sz - Wz*Sy)*dt
+	Sy += (-Wx*Sz + Wz*Sx)*dt
+	Sz += (Wx*Sy - Wy*Sx)*dt
+}
+
+var proj = cabinet_projector(60)
+var bloch_vec = document.getElementById("bloch-vector")
+	projx = document.getElementById("projx"),
+	projy = document.getElementById("projy"),
+	helpx = document.getElementById("helpx"),
+	helpy = document.getElementById("helpy"),
+	helpxy = document.getElementById("helpxy"),
+	qu_head = document.getElementById("qu-triangle"),
+	overxy = document.getElementById("overxy"),
+	overz = document.getElementById("overz"),
+	overhelpxy = document.getElementById("overhelpxy")
+
+function move_bloch_vector()
+{
+	var xy = proj(Sx, Sy, Sz)
+	var x = xy[0], y = xy[1]
+
+	scr_bx = 0.9*x*100 + 160.0; scr_by = 0.9*y*-100 + 160.0; // shaft without arrowhead
+	bloch_vec.setAttribute("x2", scr_bx)
+	bloch_vec.setAttribute("y2", scr_by)
+	scr_bx = x*100 + 160.0; scr_by = y*-100 + 160.0; // shaft + arrowhead
+	// set the arrowhead length
+	qu_head.setAttribute("markerWidth", 0.1*Math.sqrt((x*100)**2 + (y*-100)**2))
+	// Behind or over the XY plane elements?
+	overxy.setAttribute("opacity", 1*(Sz < 0))
+	// ... the 0z axis?
+	overz.setAttribute("opacity", 1*(Sx < 0))
+	// ... the xy plane projection helper
+	overhelpxy.setAttribute("opacity", 1*(Sx > 0))
+
+	var scr_pyx = Sy*100 + 160.0, scr_pzy = Sz*-100 + 160.0;
+	projy.setAttribute("x2", scr_pyx)
+	xy = proj(Sx, 0, 0)
+	x = xy[0], y = xy[1]
+	var scr_pxx = x*100 + 160.0, scr_pxy = y*-100 + 160.0
+	projx.setAttribute("x2", scr_pxx)
+	projx.setAttribute("y2", scr_pxy)
+
+	xy = proj(Sx, Sy, 0)
+	x = xy[0], y = xy[1]
+	var scr_pxy_x = x*100 + 160.0, scr_pxy_y = y*-100 + 160.0
+
+	helpx.setAttribute("x1", scr_pxy_x)
+	helpx.setAttribute("y1", scr_pxy_y)
+	helpy.setAttribute("x1", scr_pxy_x)
+	helpy.setAttribute("y1", scr_pxy_y)
+	helpx.setAttribute("y2", scr_pxy)
+	helpx.setAttribute("x2", scr_pxx)
+	helpy.setAttribute("x2", scr_pyx)
+	helpxy.setAttribute("x1", scr_pxy_x)
+	helpxy.setAttribute("y1", scr_pxy_y)
+	helpxy.setAttribute("x2", scr_bx)
+	helpxy.setAttribute("y2", scr_by)
+}
+
+var prev_t = null
+
+function animation_step(t) /* [t] = ms */
+{
+	if (!prev_t) prev_t = t
+	else {
+		let dt = t - prev_t; prev_t = t
+
+		if(W*dt < 0.1) {
+			advance_paulis(dt)
+			move_bloch_vector()
+		}
+	}
+
+	window.requestAnimationFrame(animation_step)
+}
+
+window.requestAnimationFrame(animation_step)
+
+</script>
+
+</body>
+</html>
