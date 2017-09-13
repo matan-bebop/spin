@@ -165,19 +165,29 @@ function move_bloch_vector()
 	var xy = proj(Sx, Sy, Sz)
 	var x = xy[0], y = xy[1]
 
-	scr_bx = 0.9*x*100 + 160.0; scr_by = 0.9*y*-100 + 160.0; // shaft without arrowhead
+	var scr_bx = 0.9*x*100 + 160.0,
+		scr_by = 0.9*y*-100 + 160.0; // vector shaft tip
 	bloch_vec.setAttribute("x2", scr_bx)
 	bloch_vec.setAttribute("y2", scr_by)
 	scr_bx = x*100 + 160.0; scr_by = y*-100 + 160.0; // shaft + arrowhead
 	// set the arrowhead length
 	qu_head.setAttribute("markerWidth", 0.1*Math.sqrt((x*100)**2 + (y*-100)**2))
+
+	return {x:scr_bx, y:scr_by}
+}
+
+function correct_depth_order()
+{
 	// Behind or over the XY plane elements?
 	overxy.setAttribute("opacity", 1*(Sz < 0))
 	// ... the 0z axis?
 	overz.setAttribute("opacity", 1*(Sx < 0))
 	// ... the xy plane projection helper
 	overhelpxy.setAttribute("opacity", 1*(Sx > 0))
+}
 
+function move_projections(scr_b)
+{
 	var scr_pyx = Sy*100 + 160.0, scr_pzy = Sz*-100 + 160.0;
 	projy.setAttribute("x2", scr_pyx)
 	xy = proj(Sx, 0, 0)
@@ -199,8 +209,15 @@ function move_bloch_vector()
 	helpy.setAttribute("x2", scr_pyx)
 	helpxy.setAttribute("x1", scr_pxy_x)
 	helpxy.setAttribute("y1", scr_pxy_y)
-	helpxy.setAttribute("x2", scr_bx)
-	helpxy.setAttribute("y2", scr_by)
+	helpxy.setAttribute("x2", scr_b.x)
+	helpxy.setAttribute("y2", scr_b.y)
+}
+
+function move_all()
+{
+	var scr_b = move_bloch_vector()
+	move_projections(scr_b)
+	correct_depth_order()
 }
 
 var prev_t = null
@@ -213,7 +230,7 @@ function animation_step(t) /* [t] = ms */
 
 		if(W*dt < 0.1) {
 			advance_paulis(dt)
-			move_bloch_vector()
+			move_all()
 		}
 	}
 
