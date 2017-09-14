@@ -171,7 +171,8 @@ function move_bloch_vector()
 	bloch_vec.setAttribute("y2", scr_by)
 	scr_bx = x*100 + 160.0; scr_by = y*-100 + 160.0; // shaft + arrowhead
 	// set the arrowhead length
-	qu_head.setAttribute("markerWidth", 0.1*Math.sqrt((x*100)**2 + (y*-100)**2))
+	qu_head.setAttribute("markerWidth",
+		0.1*Math.sqrt(10000*x*x + 10000*y*y))
 
 	return {x:scr_bx, y:scr_by}
 }
@@ -224,9 +225,11 @@ var prev_t = null
 
 function animation_step(t) /* [t] = ms */
 {
+	var dt
+
 	if (!prev_t) prev_t = t
 	else {
-		let dt = t - prev_t; prev_t = t
+		dt = t - prev_t; prev_t = t
 
 		if(W*dt < 0.1) {
 			advance_paulis(dt)
