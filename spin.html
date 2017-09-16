@@ -242,6 +242,20 @@ function animation_step(t) /* [t] = ms */
 
 window.requestAnimationFrame(animation_step)
 
+function pulse_x(phi)
+{	
+	Wx = W; window.setTimeout(function () { Wx = 0 }, phi/Wx)
+}
+
+function pulse_y(phi)
+{	
+	Wy = W; window.setTimeout(function () { Wy = 0 }, phi/Wy)
+}
+
+function pulse_z(phi)
+{	
+	Wz = W; window.setTimeout(function () { Wz = 0 }, phi/Wz)
+}
 </script>
 
 </body>
