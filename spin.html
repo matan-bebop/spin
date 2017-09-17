@@ -93,7 +93,7 @@
 	</g>
 
 	<!-- Bloch vector; length is 0.9 due to the arrowhead -->
-	<line id="bloch-vector" x1="160.0" y1="160.0" x2="160.0" y2="70.0"
+	<line id="bloch-vector" x1="160.0" y1="160.0" x2="160.0" y2="250.0"
 		stroke="red" stroke-width=3 marker-end="url(#qu-triangle)"/>
 
 	<!-- Redraw elements if they are in front of the Bloch vector -->
@@ -109,6 +109,9 @@
 	</g>
 
 	<use id="overhelpxy" xlink:href="#helpxy"/>
+
+	<!-- Trace of the Bloch vector tip -->
+	<path id="trace" d="M 160.0 260.0" fill="transparent" stroke="blue"/>
 
 	<!-- Rotation buttons -->
 	<g opacity="0">
@@ -137,9 +140,11 @@ function cabinet_projector(theta)
 }
 
 var Sx = 0, Sy = 0, Sz = -1
-var Wx, Wy, Wz; Wx = Wy = Wz = 0
 
+var Wx, Wy, Wz; Wx = Wy = Wz = 0
 const W = 0.5e-3
+
+var trace_on = false
 
 function advance_paulis(dt)
 {
@@ -158,7 +163,8 @@ var bloch_vec = document.getElementById("bloch-vector")
 	qu_head = document.getElementById("qu-triangle"),
 	overxy = document.getElementById("overxy"),
 	overz = document.getElementById("overz"),
-	overhelpxy = document.getElementById("overhelpxy")
+	overhelpxy = document.getElementById("overhelpxy"),
+	trace = document.getElementById("trace")
 
 function move_bloch_vector()
 {
@@ -214,11 +220,19 @@ function move_projections(scr_b)
 	helpxy.setAttribute("y2", scr_b.y)
 }
 
+function trace_add_node(scr_b)
+{
+	var d = trace.getAttribute("d")
+	trace.setAttribute("d", d + " L " + scr_b.x + " " + scr_b.y)
+}
+
 function move_all()
 {
 	var scr_b = move_bloch_vector()
 	move_projections(scr_b)
 	correct_depth_order()
+	if(trace_on) 
+		trace_add_node(scr_b)
 }
 
 var prev_t = null
@@ -242,20 +256,23 @@ function animation_step(t) /* [t] = ms */
 
 window.requestAnimationFrame(animation_step)
 
-function pulse_x(phi)
+// Applies a sequence of pulses. Rotation angles of each 
+// pulse are given by an argument [{x:phi_x, y:phi_y, z:phi_z}, ... ]
+function pulse_seq(vs)
 {	
-	Wx = W; window.setTimeout(function () { Wx = 0 }, phi/Wx)
+	if(!vs.length) {
+		Wx = Wy = Wz = 0
+		return
+	}
+
+	var len = Math.sqrt(vs[0].x*vs[0].x + vs[0].y*vs[0].y + vs[0].z*vs[0].z)
+	Wx = W * vs[0].x / len
+	Wy = W * vs[0].y / len
+	Wz = W * vs[0].z / len
+
+	window.setTimeout(function () { pulse_seq(vs.slice(1)) }, len/W)
 }
 
-function pulse_y(phi)
-{	
-	Wy = W; window.setTimeout(function () { Wy = 0 }, phi/Wy)
-}
-
-function pulse_z(phi)
-{	
-	Wz = W; window.setTimeout(function () { Wz = 0 }, phi/Wz)
-}
 </script>
 
 </body>
