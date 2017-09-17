@@ -242,7 +242,7 @@ function animation_step(t) /* [t] = ms */
 	var dt
 
 	if (!prev_t) prev_t = t
-	else {
+	else if (Wx != 0 || Wy != 0 || Wz != 0){
 		dt = t - prev_t; prev_t = t
 
 		if(W*dt < 0.1) {
@@ -257,6 +257,8 @@ function animation_step(t) /* [t] = ms */
 window.requestAnimationFrame(animation_step)
 
 // Applies a sequence of pulses.
+// An argument is an array of objects [{axis:[x,y,z], phi:angle}, ...].
+// Here x, y, z give the rotation axis direction; phi is the rotation angle
 function pulse_seq(vs)
 {	
 	function normalize(v)
