@@ -256,21 +256,27 @@ function animation_step(t) /* [t] = ms */
 
 window.requestAnimationFrame(animation_step)
 
-// Applies a sequence of pulses. Rotation angles of each 
-// pulse are given by an argument [{x:phi_x, y:phi_y, z:phi_z}, ... ]
+// Applies a sequence of pulses.
 function pulse_seq(vs)
 {	
+	function normalize(v)
+	{	
+		len = Math.sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2])
+		v[0] /= len; v[1] /= len; v[2] /= len
+	}
+		
 	if(!vs.length) {
 		Wx = Wy = Wz = 0
 		return
 	}
 
-	var len = Math.sqrt(vs[0].x*vs[0].x + vs[0].y*vs[0].y + vs[0].z*vs[0].z)
-	Wx = W * vs[0].x / len
-	Wy = W * vs[0].y / len
-	Wz = W * vs[0].z / len
+	normalize(vs[0].axis)
 
-	window.setTimeout(function () { pulse_seq(vs.slice(1)) }, len/W)
+	Wx = W * vs[0].axis[0]
+	Wy = W * vs[0].axis[1]
+	Wz = W * vs[0].axis[2]
+
+	window.setTimeout(function () { pulse_seq(vs.slice(1)) }, vs[0].phi/W)
 }
 
 </script>
