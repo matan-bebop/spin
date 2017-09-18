@@ -220,11 +220,23 @@ function move_projections(scr_b)
 	helpxy.setAttribute("y2", scr_b.y)
 }
 
-function trace_add_node(scr_b)
-{
-	var d = trace.getAttribute("d")
-	trace.setAttribute("d", d + " L " + scr_b.x + " " + scr_b.y)
-}
+var trace_add_node = (function() {
+	prev_scr_b = {x:Infinity, y:Infinity}
+
+	return function(scr_b) {
+		var d = trace.getAttribute("d"),
+			// Start a new trace if we are too far away from the old one
+			new_trace = Math.abs(prev_scr_b.x - scr_b.x) > 5.00 &&
+						Math.abs(prev_scr_b.y - scr_b.y) > 5.00
+		
+		// If we are to start a new trace, merely move to its start;
+		// continue the old trace otherwise
+		trace.setAttribute("d", d + (new_trace? " M ":" L ")
+							+ scr_b.x + " " + scr_b.y)
+
+		prev_scr_b = scr_b
+	}
+})()
 
 function move_all()
 {
@@ -245,7 +257,9 @@ function animation_step(t) /* [t] = ms */
 	else if (Wx != 0 || Wy != 0 || Wz != 0){
 		dt = t - prev_t; prev_t = t
 
-		if(W*dt < 0.1) {
+		// Don't move if we were idling for too much, e.g. the window was 
+		// inactive for some time
+		if(W*dt < 0.1) { 
 			advance_paulis(dt)
 			move_all()
 		}
