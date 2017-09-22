@@ -127,6 +127,21 @@
 
 <script>
 
+
+function Spin(doc) {
+
+this.Sx = 0; this.Sy = 0; this.Sz = -1
+
+this.advance_paulis = function(dt, Wx, Wy, Wz)
+{
+	this.Sx += (Wy*this.Sz - Wz*this.Sy)*dt
+	this.Sy += (-Wx*this.Sz + Wz*this.Sx)*dt
+	this.Sz += (Wx*this.Sy - Wy*this.Sx)*dt
+}
+
+} // end Spin
+
+
 function cabinet_projector(theta)
 {
 	const pi = Math.PI, sin = Math.sin, cos = Math.cos
@@ -139,36 +154,31 @@ function cabinet_projector(theta)
 	}
 }
 
-var Sx = 0, Sy = 0, Sz = -1
 
-var Wx, Wy, Wz; Wx = Wy = Wz = 0
-const W = 0.5e-3
+function SpinView(spin, doc, projector) {
 
-var trace_on = false
+this.trace_on = false
+this.s = spin
 
-function advance_paulis(dt)
-{
-	Sx += (Wy*Sz - Wz*Sy)*dt
-	Sy += (-Wx*Sz + Wz*Sx)*dt
-	Sz += (Wx*Sy - Wy*Sx)*dt
-}
+var proj = projector
+if(typeof proj === 'undefined')
+	proj = cabinet_projector(60)
 
-var proj = cabinet_projector(60)
-var bloch_vec = document.getElementById("bloch-vector")
-	projx = document.getElementById("projx"),
-	projy = document.getElementById("projy"),
-	helpx = document.getElementById("helpx"),
-	helpy = document.getElementById("helpy"),
-	helpxy = document.getElementById("helpxy"),
-	qu_head = document.getElementById("qu-triangle"),
-	overxy = document.getElementById("overxy"),
-	overz = document.getElementById("overz"),
-	overhelpxy = document.getElementById("overhelpxy"),
-	trace = document.getElementById("trace")
+var bloch_vec = doc.getElementById("bloch-vector")
+	projx = doc.getElementById("projx"),
+	projy = doc.getElementById("projy"),
+	helpx = doc.getElementById("helpx"),
+	helpy = doc.getElementById("helpy"),
+	helpxy = doc.getElementById("helpxy"),
+	qu_head = doc.getElementById("qu-triangle"),
+	overxy = doc.getElementById("overxy"),
+	overz = doc.getElementById("overz"),
+	overhelpxy = doc.getElementById("overhelpxy"),
+	trace = doc.getElementById("trace")
 
 function move_bloch_vector()
 {
-	var xy = proj(Sx, Sy, Sz)
+	var xy = proj(this.s.Sx, this.s.Sy, this.s.Sz)
 	var x = xy[0], y = xy[1]
 
 	var scr_bx = 0.9*x*100 + 160.0,
@@ -186,24 +196,24 @@ function move_bloch_vector()
 function correct_depth_order()
 {
 	// Behind or over the XY plane elements?
-	overxy.setAttribute("opacity", 1*(Sz < 0))
+	overxy.setAttribute("opacity", 1*(this.s.Sz < 0))
 	// ... the 0z axis?
-	overz.setAttribute("opacity", 1*(Sx < 0))
+	overz.setAttribute("opacity", 1*(this.s.Sx < 0))
 	// ... the xy plane projection helper
-	overhelpxy.setAttribute("opacity", 1*(Sx > 0))
+	overhelpxy.setAttribute("opacity", 1*(this.s.Sx > 0))
 }
 
 function move_projections(scr_b)
 {
-	var scr_pyx = Sy*100 + 160.0, scr_pzy = Sz*-100 + 160.0;
+	var scr_pyx = this.s.Sy*100 + 160.0, scr_pzy = this.s.Sz*-100 + 160.0;
 	projy.setAttribute("x2", scr_pyx)
-	xy = proj(Sx, 0, 0)
+	xy = proj(this.s.Sx, 0, 0)
 	x = xy[0], y = xy[1]
 	var scr_pxx = x*100 + 160.0, scr_pxy = y*-100 + 160.0
 	projx.setAttribute("x2", scr_pxx)
 	projx.setAttribute("y2", scr_pxy)
 
-	xy = proj(Sx, Sy, 0)
+	xy = proj(this.s.Sx, this.s.Sy, 0)
 	x = xy[0], y = xy[1]
 	var scr_pxy_x = x*100 + 160.0, scr_pxy_y = y*-100 + 160.0
 
@@ -222,6 +232,7 @@ function move_projections(scr_b)
 
 var trace_add_node = (function() {
 	prev_scr_b = {x:Infinity, y:Infinity}
+	trace = this.trace
 
 	return function(scr_b) {
 		var d = trace.getAttribute("d"),
@@ -238,14 +249,22 @@ var trace_add_node = (function() {
 	}
 })()
 
-function move_all()
+this.move_all = function()
 {
 	var scr_b = move_bloch_vector()
 	move_projections(scr_b)
 	correct_depth_order()
-	if(trace_on) 
+	if(this.trace_on) 
 		trace_add_node(scr_b)
 }
+
+} // end SpinView
+
+s = new Spin
+sv = new SpinView(s, document)
+
+var Wx, Wy, Wz; Wx = Wy = Wz = 0
+const W = 0.5e-3
 
 var prev_t = null
 
@@ -260,8 +279,8 @@ function animation_step(t) /* [t] = ms */
 		// Don't move if we were idling for too much, e.g. the window was 
 		// inactive for some time
 		if(W*dt < 0.1) { 
-			advance_paulis(dt)
-			move_all()
+			s.advance_paulis(dt, Wx, Wy, Wz)
+			sv.move_all()
 		}
 	}
 
