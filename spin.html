@@ -13,13 +13,14 @@
 
 <script>
 
-var s = new Spin, sv
+var s = new Spin,
+	sv // to be a SpinView instance
 
-window.onload = function() { /* Hook to the svg DOM when it is ready */
+window.onload = function() { // Hook to the SVG DOM when it is ready
 	var svg_doc = document.getElementById("spin").contentDocument
 	sv = new SpinView(s, svg_doc)
 
-	/* Setup controls */
+	// Setup controls
 	svg_doc.getElementById("rot-x").onmousedown = function() { Wx = W }
 	svg_doc.getElementById("rot-y").onmousedown = function() { Wy = W }
 	svg_doc.getElementById("rot-z").onmousedown = function() { Wz = W }
@@ -34,7 +35,7 @@ const W = 0.5e-3
 
 var prev_t = null
 
-function animation_step(t) /* [t] = ms */
+function animation_step(t) // [t] = ms
 {
 	var dt
 

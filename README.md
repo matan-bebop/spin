@@ -56,4 +56,4 @@ To draw a trace of the vector's tip, set
 ```
 trace_on = true
 ```
-in the JavaScript in your favorite browser console.
+in the JavaScript console.
