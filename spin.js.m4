@@ -101,23 +101,21 @@ function move_projections(scr_b)
 	helpxy.setAttribute("y2", scr_b.y)
 }
 
-var trace_add_node = (function() {
-	prev_scr_b = {x:Infinity, y:Infinity}
+this.prev_scr_b = {x:Infinity, y:Infinity}
+var this_trace_add_node = (function(scr_b)
+{
+	var d = trace.getAttribute("d"),
+		// Start a new trace if we are too far away from the old one
+		new_trace = Math.abs(this.prev_scr_b.x - scr_b.x) > 5.00 &&
+					Math.abs(this.prev_scr_b.y - scr_b.y) > 5.00
+	
+	// If we are to start a new trace, merely move to its start;
+	// continue the old trace otherwise
+	trace.setAttribute("d", d + (new_trace? " M ":" L ")
+		   					+ scr_b.x + " " + scr_b.y)
 
-	return function(scr_b) {
-		var d = trace.getAttribute("d"),
-			// Start a new trace if we are too far away from the old one
-			new_trace = Math.abs(prev_scr_b.x - scr_b.x) > ABS(LX(0.05)) &&
-						Math.abs(prev_scr_b.y - scr_b.y) > ABS(LY(0.05))
-		
-		// If we are to start a new trace, merely move to its start;
-		// continue the old trace otherwise
-		trace.setAttribute("d", d + (new_trace? " M ":" L ")
-							+ scr_b.x + " " + scr_b.y)
-
-		prev_scr_b = scr_b
-	}
-})()
+	this.prev_scr_b = scr_b
+}).bind(this)
 
 this.move_all = function()
 {
@@ -125,7 +123,7 @@ this.move_all = function()
 	move_projections(scr_b)
 	correct_depth_order()
 	if(this.trace_on) 
-		trace_add_node(scr_b)
+		this_trace_add_node(scr_b)
 }
 
 this.clear_trace = function()
