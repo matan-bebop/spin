@@ -54,6 +54,6 @@ rotates the spin first by π/2 around the y axis, then by π around the z axis.
 #### Drawing the Bloch vector trajectory
 To draw a trace of the vector's tip, set
 ```
-trace_on = true
+sv.trace_on = true
 ```
 in the JavaScript console.

@@ -74,11 +74,12 @@ function pulse_seq(vs)
 
 	normalize(vs[0].axis)
 
-	Wx = W * vs[0].axis[0]
-	Wy = W * vs[0].axis[1]
-	Wz = W * vs[0].axis[2]
+	Wx = W * vs[0].axis[0] * Math.sign(vs[0].phi)
+	Wy = W * vs[0].axis[1] * Math.sign(vs[0].phi)
+	Wz = W * vs[0].axis[2] * Math.sign(vs[0].phi)
 
-	window.setTimeout(function () { pulse_seq(vs.slice(1)) }, vs[0].phi/W)
+	window.setTimeout(function () { pulse_seq(vs.slice(1)) },
+						 Math.abs(vs[0].phi)/W)
 }
 
 </script>
