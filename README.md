@@ -57,3 +57,8 @@ To draw a trace of the vector's tip, set
 sv.trace_on = true
 ```
 in the JavaScript console.
+
+To clear the trace call
+```
+sv.clear_trace()
+```

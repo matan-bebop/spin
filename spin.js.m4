@@ -79,7 +79,7 @@ function move_projections(scr_b)
 	var scr_pyx = s.Sy*SX + DX, scr_pzy = s.Sz*SY + DY;
 	projy.setAttribute("x2", scr_pyx)
 	xy = proj(s.Sx, 0, 0)
-	x = xy[0], y = xy[1]
+	var x = xy[0], y = xy[1]
 	var scr_pxx = x*SX + DX, scr_pxy = y*SY + DY
 	projx.setAttribute("x2", scr_pxx)
 	projx.setAttribute("y2", scr_pxy)
@@ -126,6 +126,13 @@ this.move_all = function()
 	correct_depth_order()
 	if(this.trace_on) 
 		trace_add_node(scr_b)
+}
+
+this.clear_trace = function()
+{
+	var xy = proj(s.Sx, s.Sy, s.Sz),
+		scr_x = xy[0]*SX + DX, scr_y = xy[1]*SY + DY;
+	trace.setAttribute("d", "M " + scr_x + " " + scr_y)
 }
 
 } // end SpinView
