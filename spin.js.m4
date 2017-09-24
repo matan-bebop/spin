@@ -48,8 +48,6 @@ var bloch_vec = doc.getElementById("bloch-vector"),
 	overhelpxy = doc.getElementById("overhelpxy"),
 	trace = doc.getElementById("trace")
 
-console.log(doc, bloch_vec)
-
 function move_bloch_vector()
 {
 	var xy = proj(this.s.Sx, this.s.Sy, this.s.Sz)
@@ -106,7 +104,6 @@ function move_projections(scr_b)
 
 var trace_add_node = (function() {
 	prev_scr_b = {x:Infinity, y:Infinity}
-	trace = this.trace
 
 	return function(scr_b) {
 		var d = trace.getAttribute("d"),
