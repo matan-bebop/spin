@@ -1,6 +1,7 @@
 # spin
 
 An HTML5 interactive Bloch sphere.
+See http://matan-bebop.github.io/spin/spin.html and http://matan-bebop.github.io/pop/quant2.html for a live demo.
 
 ## How to build a working HTML
 
